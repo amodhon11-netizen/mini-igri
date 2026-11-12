@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Крутилка номеров</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#cfd8d3;--ink:#1f2a2e;--soft:#5b6a6e;--card:#fff;--accent:#2b5d8a;--note:#ffe45e;--line:#9fb0a9;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a2224;--ink:#e8efec;--soft:#97a8a8;--card:#2e3b3f;--accent:#6fb0e8;--line:#44575b}}
+:root[data-theme="dark"]{--bg:#1a2224;--ink:#e8efec;--soft:#97a8a8;--card:#2e3b3f;--accent:#6fb0e8;--line:#44575b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Archivo',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;display:flex;justify-content:center}
+#app{width:100%;max-width:620px;padding:12px;display:flex;flex-direction:column;gap:14px}
+.top{display:flex;align-items:center;gap:12px}
+.top h1{font-size:20px;margin:0;font-weight:800}
+.top a{color:var(--accent);font-weight:700;text-decoration:none}
+.stage{background:var(--card);border:2px solid var(--ink);box-shadow:6px 6px 0 var(--ink);padding:18px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.plate{display:inline-flex;align-items:stretch;background:#fff;color:#111;border:3px solid #111;border-radius:10px;font-weight:800;padding:4px 10px;gap:10px;--ps:clamp(32px,10vw,56px);line-height:1.1}
+.plate .m{display:flex;align-items:center;gap:8px;font-size:var(--ps);letter-spacing:.03em}
+.plate .rg{border-left:3px solid #111;padding-left:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:calc(var(--ps)*.62)}
+.plate .rg small{font-size:.38em;letter-spacing:.1em}
+.plate.sm{--ps:19px;padding:2px 7px;border-width:2px;border-radius:6px;gap:6px}
+.plate.sm .rg{border-left-width:2px;padding-left:6px}
+.tier{display:inline-block;color:#fff;font-weight:800;padding:3px 12px;border-radius:99px;font-size:14px}
+.price{font-size:clamp(26px,8vw,38px);font-weight:800;font-variant-numeric:tabular-nums}
+.tags{color:var(--soft);font-size:14px;line-height:1.5;min-height:21px}
+.row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+button{font:inherit;font-weight:700;padding:10px 16px;border:2px solid var(--ink);border-radius:3px;background:var(--card);color:var(--ink);cursor:pointer}
+button.main{background:var(--note);color:#1f2a2e;font-size:18px}
+button:disabled{opacity:.5}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.stats div{background:var(--card);border:2px solid var(--ink);padding:8px;font-size:13px;color:var(--soft)}
+.stats b{display:block;font-size:17px;color:var(--ink);font-variant-numeric:tabular-nums}
+h2{font-size:17px;margin:0 0 8px}
+.list{display:flex;flex-direction:column;gap:6px}
+.li{display:flex;align-items:center;gap:10px;background:var(--card);border:2px solid var(--line);padding:6px 10px;flex-wrap:wrap}
+.li .pr{margin-left:auto;font-weight:800;font-variant-numeric:tabular-nums}
+.li .no{font-weight:800;color:var(--soft);width:22px}
+.empty{color:var(--soft);font-size:14px}
+details{background:var(--card);border:2px solid var(--line);padding:10px 12px;font-size:14px;line-height:1.5}
+summary{font-weight:700;cursor:pointer}
+.note{color:var(--soft);font-size:12px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top"><a href="./">← Все игры</a><h1>Крутилка номеров</h1></div>
+  <div class="stage">
+    <div id="pl"></div>
+    <span class="tier" id="tier"></span>
+    <div class="price" id="price"></div>
+    <div class="tags" id="tags"></div>
+    <div class="row">
+      <button class="main" id="s1">Крутить</button>
+      <button id="s10">×10</button>
+      <button id="s100">×100</button>
+      <button id="s1000">×1000</button>
+    </div>
+  </div>
+  <div class="stats">
+    <div><b id="n">0</b>круток</div>
+    <div><b id="tot">0</b>стоимость всех</div>
+    <div><b id="rare">0</b>редких и выше</div>
+  </div>
+  <div><h2>Лучшие выпавшие</h2><div class="list" id="top"></div></div>
+  <div><h2>Последние</h2><div class="list" id="hist"></div></div>
+  <details><summary>Что ценится в номерах</summary>
+    Тройки цифр (777, 999, 888, 555 и другие), «нули впереди» (001, 007), круглые сотни (100, 700), лесенки (123, 321), зеркальные цифры (121, 505), пары цифр. В буквах ценятся повторы (ММ, ККК) и слова (КОТ, РОК, САМ, ТОМ и другие). Дороже всего номера из Москвы, затем Санкт-Петербург, Московская область и Крым. Бонусы множатся между собой, поэтому «Мифические» номера выпадают очень редко.
+  </details>
+  <div class="note">Игра для развлечения. Цены условные и примерные, это не настоящая рыночная оценка. Номера случайные и не связаны с реальными автомобилями или людьми.</div>
+  <div class="row"><button id="rst">Сбросить прогресс</button></div>
+</div>
+<script>
+/*E*/
+const LT='АВЕКМНОРСТУХ';
+const WORDS=new Set('КОТ ТОК РОК КОМ МАМ ТАМ САМ НОС ВАН ВОТ ТОР МАК КАК ТАК РАК ХОР ТУР СОН КОН ТОМ ТЕМ МЕТ НЕТ ТОТ РОМ КАМ МОТ ВОН ОКО'.split(' '));
+const REG=[...Array(99)].map((_,i)=>String(i+1).padStart(2,'0')).filter(c=>!['20','80','81','84','85','88'].includes(c))
+ .concat('102 113 116 121 123 124 125 126 134 136 138 142 147 150 152 154 159 161 163 164 173 174 177 178 186 190 193 196 197 198 199 716 725 750 761 763 774 777 790 797 799'.split(' '));
+const NAMES={};
+[['Москва','77 97 99 177 197 199 277 777 797 799'],['Санкт-Петербург','78 98 178'],['Московская обл.','50 90 150 190 750 790'],['Крым','82'],['Севастополь','92'],
+ ['Татарстан','16 116 716'],['Краснодарский край','23 93 123'],['Свердловская обл.','66 96 196'],['Челябинская обл.','74 174'],['Нижегородская обл.','52 152'],
+ ['Новосибирская обл.','54 154'],['Самарская обл.','63 163'],['Ростовская обл.','61 161'],['Башкортостан','02 102'],['Пермский край','59 159'],['Красноярский край','24 124']]
+ .forEach(([n,c])=>c.split(' ').forEach(x=>NAMES[x]=n));
+const TRI={1:120000,2:100000,3:100000,4:80000,5:150000,6:90000,7:600000,8:350000,9:350000};
+const TIERS=[['Обычный','#7d8d8d'],['Неплохой','#3f9a68'],['Красивый','#2b7fd0'],['Редкий','#8a4cd6'],['Эпический','#d9701a'],['Легендарный','#d93a2b'],['Мифический','#b38f00']];
+const TH=[5000,15000,100000,500000,2e6,1e7];
+function gen(){const L=()=>LT[Math.floor(Math.random()*12)];
+ return{a:L(),d:String(1+Math.floor(Math.random()*999)).padStart(3,'0'),b:L()+L(),r:REG[Math.floor(Math.random()*REG.length)]}}
+function evalP(p){const[x,y,z]=p.d.split('').map(Number);let dv=0;const tg=[];
+ if(x===y&&y===z){dv=TRI[x];tg.push('Тройка '+p.d)}
+ else if(x===0&&y===0){dv=z===1?150000:z===7?200000:70000;tg.push('Нули впереди: '+p.d)}
+ else if(y===0&&z===0){dv=x===7?90000:x===1?80000:45000;tg.push('Круглая сотня')}
+ else if(y===x+1&&z===y+1){dv=60000;tg.push('Лесенка вверх')}
+ else if(y===x-1&&z===y-1){dv=40000;tg.push('Лесенка вниз')}
+ else if(x===z){dv=10000;tg.push('Зеркальные цифры')}
+ else if(x===y||y===z){dv=4000;tg.push('Пара цифр')}
+ else if(y===0){dv=3000;tg.push('Ноль посередине')}
+ else if(z===0){dv=1000;tg.push('Ноль на конце')}
+ const a=p.a,l2=p.b[0],l3=p.b[1];let lv=0;
+ if(a===l2&&l2===l3){lv=80000;tg.push('Тройка букв '+a+l2+l3)}
+ else if(l2===l3){lv=6000;tg.push('Одинаковые буквы в конце')}
+ else if(a===l2||a===l3){lv=2000;tg.push('Повтор буквы')}
+ if(WORDS.has(a+l2+l3)){lv+=25000;tg.push('Слово «'+(a+l2+l3).toLowerCase()+'»')}
+ let v=dv+lv;
+ if(!v)return{rub:0,tier:0,tags:['Обычный номер']};
+ if(dv&&lv){v*=1.3;tg.push('Комбо цифр и букв')}
+ let m=1;const nm=NAMES[p.r];
+ if(p.r==='777')m=3;else if(nm==='Москва')m=2;else if(nm==='Санкт-Петербург')m=1.6;else if(nm==='Московская обл.')m=1.3;else if(nm==='Крым')m=1.2;
+ if(m>1)tg.push('Регион '+p.r+' ('+nm+') ×'+m);
+ else if(nm)tg.push('Регион '+p.r+' ('+nm+')');
+ if(dv&&p.r.length===3&&p.r===p.d){m*=2;tg.push('Цифры совпали с регионом')}
+ else if(dv&&p.r.length===2&&p.d.endsWith(p.r)){m*=1.3;tg.push('Цифры как регион')}
+ v*=m;
+ const rub=v<10000?Math.round(v/100)*100:Math.round(v/1000)*1000;
+ let t=0;TH.forEach((h,i)=>{if(rub>=h)t=i+1});
+ return{rub,tier:t,tags:tg}}
+/*/E*/
+const $=id=>document.getElementById(id);
+const fmt=n=>n.toLocaleString('ru-RU')+' ₽';
+const KEY='nomera_v1';
+let S={n:0,tot:0,rare:0,top:[],hist:[]};
+try{const s=localStorage.getItem(KEY);if(s)S=Object.assign(S,JSON.parse(s))}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function plate(p,sm){return '<div class="plate'+(sm?' sm':'')+'"><div class="m"><span>'+p.a+'</span><span>'+p.d+'</span><span>'+p.b+'</span></div><div class="rg"><span>'+p.r+'</span><small>RUS</small></div></div>'}
+function show(p,e,anim){
+ $('pl').innerHTML=plate(p);
+ const tr=$('tier');
+ if(anim){tr.textContent='…';tr.style.background='#7d8d8d';$('price').textContent='';$('tags').textContent='';return}
+ tr.textContent=TIERS[e.tier][0];tr.style.background=TIERS[e.tier][1];
+ $('price').textContent=e.rub?fmt(e.rub):'0 ₽';$('tags').textContent=e.tags.join(' · ')}
+function list(el,arr,rank){
+ el.innerHTML=arr.length?arr.map((x,i)=>'<div class="li">'+(rank?'<span class="no">'+(i+1)+'</span>':'')+plate(x.p,true)+'<span style="color:'+TIERS[x.tier][1]+';font-weight:700;font-size:13px">'+TIERS[x.tier][0]+'</span><span class="pr">'+(x.rub?fmt(x.rub):'0 ₽')+'</span></div>').join(''):'<div class="empty">Пока пусто, крути!</div>'}
+function render(){
+ $('n').textContent=S.n.toLocaleString('ru-RU');$('tot').textContent=fmt(S.tot);$('rare').textContent=S.rare;
+ list($('top'),S.top,true);list($('hist'),S.hist,false)}
+function take(p,e){S.n++;S.tot+=e.rub;if(e.tier>=3)S.rare++;
+ if(e.rub>0){const k=p.a+p.d+p.b+p.r;if(!S.top.some(x=>x.k===k)){S.top.push({k,p,rub:e.rub,tier:e.tier});S.top.sort((a,b)=>b.rub-a.rub);S.top=S.top.slice(0,10)}}}
+let busy=false;
+function spin(n){if(busy)return;busy=true;document.querySelectorAll('button').forEach(b=>b.disabled=true);
+ const fin=()=>{busy=false;document.querySelectorAll('button').forEach(b=>b.disabled=false);render();save()};
+ if(n===1){let k=0;const iv=setInterval(()=>{show(gen(),null,true);if(++k>10){clearInterval(iv);
+   const p=gen(),e=evalP(p);take(p,e);S.hist.unshift({p,rub:e.rub,tier:e.tier});S.hist=S.hist.slice(0,8);show(p,e);fin()}},60)}
+ else{let best=null;for(let i=0;i<n;i++){const p=gen(),e=evalP(p);take(p,e);if(!best||e.rub>best.e.rub)best={p,e}}
+  S.hist.unshift({p:best.p,rub:best.e.rub,tier:best.e.tier});S.hist=S.hist.slice(0,8);show(best.p,best.e);
+  $('tags').textContent='Лучший из '+n+': '+best.e.tags.join(' · ');fin()}}
+$('s1').onclick=()=>spin(1);$('s10').onclick=()=>spin(10);$('s100').onclick=()=>spin(100);$('s1000').onclick=()=>spin(1000);
+$('rst').onclick=()=>{if(confirm('Сбросить всю статистику и топ?')){S={n:0,tot:0,rare:0,top:[],hist:[]};save();render();$('pl').innerHTML=plate({a:'А',d:'777',b:'АА',r:'77'});$('tier').textContent='';$('price').textContent='';$('tags').textContent='Жми «Крутить»'}};
+$('pl').innerHTML=plate({a:'А',d:'777',b:'АА',r:'77'});$('tags').textContent='Жми «Крутить»';render();
+</script>
+</body>
+</html>
