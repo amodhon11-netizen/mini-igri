@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Block Blast</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#cfd8d3;--ink:#1f2a2e;--soft:#5b6a6e;--card:#fff;--accent:#2b5d8a;--note:#ffe45e;--cell:#dfe7e2;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a2224;--ink:#e8efec;--soft:#97a8a8;--card:#2e3b3f;--accent:#6fb0e8;--cell:#34444a}}
+:root[data-theme="dark"]{--bg:#1a2224;--ink:#e8efec;--soft:#97a8a8;--card:#2e3b3f;--accent:#6fb0e8;--cell:#34444a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Archivo',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;display:flex;justify-content:center;touch-action:manipulation}
+#app{width:100%;max-width:520px;padding:12px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.top{width:100%;display:flex;align-items:center;gap:12px}
+.top h1{font-size:20px;margin:0;font-weight:800}
+.top a{color:var(--accent);font-weight:700;text-decoration:none}
+.hud{width:100%;display:flex;justify-content:space-between;font-weight:800;font-size:18px;font-variant-numeric:tabular-nums}
+#msg{min-height:24px;font-weight:800;color:var(--accent)}
+#bd{--bs:min(92vw,420px);width:var(--bs);height:var(--bs);display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);gap:2px;padding:2px;background:var(--ink);border:3px solid var(--ink);box-shadow:6px 6px 0 var(--ink);position:relative}
+.c{background:var(--cell);min-width:0;min-height:0}
+.k1{background:#e5534b}.k2{background:#f0a73a}.k3{background:#e8d23a}.k4{background:#47b56d}.k5{background:#3f8fe0}.k6{background:#9a5ad6}
+.pv{outline:3px solid #fff;outline-offset:-3px;filter:brightness(1.25)}
+.pv.bad{display:none}
+.hit{animation:pop .3s}
+@keyframes pop{0%{transform:scale(1.25);filter:brightness(2)}100%{transform:scale(1)}}
+#tray{width:min(92vw,420px);display:flex;justify-content:space-around;align-items:center;min-height:120px}
+.slot{width:30%;height:110px;display:flex;align-items:center;justify-content:center;touch-action:none;cursor:grab}
+.pc{display:grid;gap:2px;pointer-events:none}
+.pc i{display:block;width:var(--cs);height:var(--cs)}
+.pc i.e{background:transparent}
+#fl{position:fixed;z-index:50;pointer-events:none;display:none}
+.veil{position:fixed;inset:0;z-index:60;background:rgba(20,28,30,.7);display:none;align-items:center;justify-content:center;padding:20px}
+.box{background:var(--card);border:2px solid var(--ink);box-shadow:6px 6px 0 var(--ink);padding:24px;text-align:center;max-width:360px}
+.box h2{margin:0 0 8px;font-size:28px}
+button{font:inherit;font-weight:700;padding:10px 18px;border:2px solid var(--ink);border-radius:3px;background:var(--note);color:#1f2a2e;cursor:pointer}
+.note{color:var(--soft);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top"><a href="./">← Все игры</a><h1>Block Blast</h1></div>
+  <div class="hud"><span>Очки: <span id="sc">0</span></span><span>Рекорд: <span id="best">0</span></span></div>
+  <div id="msg"></div>
+  <div id="bd"></div>
+  <div id="tray"></div>
+  <div class="note">Перетаскивай фигуры на поле. Заполненные ряды и столбцы исчезают. Чем больше линий за раз и подряд, тем больше очков.</div>
+</div>
+<div id="fl"></div>
+<div class="veil" id="veil"><div class="box"><h2>Нет места!</h2><p>Твой счёт: <b id="fs">0</b></p><button id="again">Играть снова</button></div></div>
+<script>
+const $=id=>document.getElementById(id);
+const N=8;
+const SH=[[[0,0]],[[0,0],[0,1]],[[0,0],[1,0]],[[0,0],[0,1],[0,2]],[[0,0],[1,0],[2,0]],[[0,0],[0,1],[0,2],[0,3]],[[0,0],[1,0],[2,0],[3,0]],
+ [[0,0],[0,1],[0,2],[0,3],[0,4]],[[0,0],[1,0],[2,0],[3,0],[4,0]],[[0,0],[0,1],[1,0],[1,1]],[[0,0],[0,1],[0,2],[1,0],[1,1],[1,2]],[[0,0],[0,1],[1,0],[1,1],[2,0],[2,1]],
+ [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2],[2,0],[2,1],[2,2]],
+ [[0,0],[1,0],[1,1]],[[0,1],[1,0],[1,1]],[[0,0],[0,1],[1,0]],[[0,0],[0,1],[1,1]],
+ [[0,0],[1,0],[2,0],[2,1],[2,2]],[[0,0],[0,1],[0,2],[1,0],[2,0]],[[0,0],[0,1],[0,2],[1,2],[2,2]],[[0,2],[1,2],[2,0],[2,1],[2,2]],
+ [[0,0],[0,1],[0,2],[1,1]],[[0,1],[1,0],[1,1],[1,2]],[[0,0],[1,0],[2,0],[1,1]],[[0,1],[1,0],[1,1],[2,1]],
+ [[0,0],[0,1],[1,1],[1,2]],[[0,1],[0,2],[1,0],[1,1]],[[0,0],[1,0],[1,1],[2,1]],[[0,1],[1,0],[1,1],[2,0]]];
+const WT=SH.map(s=>s.length<=3?4:s.length<=5?3:2);
+let grid,pcs,score,best=0,combo,drag=null,over;
+try{best=+localStorage.getItem('bb_best')||0}catch(e){}
+const rnd=n=>Math.floor(Math.random()*n);
+function pickShape(){const t=WT.reduce((a,b)=>a+b);let r=Math.random()*t,i=0;while(r>=WT[i]){r-=WT[i];i++}return i}
+function dims(s){return[Math.max(...s.map(x=>x[0]))+1,Math.max(...s.map(x=>x[1]))+1]}
+function fits(s,r,c){return s.every(([a,b])=>{const y=r+a,x=c+b;return y>=0&&y<N&&x>=0&&x<N&&!grid[y*N+x]})}
+function canAny(s){for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(fits(s,r,c))return true;return false}
+function newPcs(){pcs=[0,1,2].map(()=>({i:pickShape(),k:1+rnd(6),used:false}))}
+function pieceEl(p,cs){const s=SH[p.i],[h,w]=dims(s);const d=document.createElement('div');d.className='pc';
+ d.style.setProperty('--cs',cs+'px');d.style.gridTemplateColumns='repeat('+w+',auto)';
+ for(let r=0;r<h;r++)for(let c=0;c<w;c++){const i=document.createElement('i');i.className=s.some(x=>x[0]===r&&x[1]===c)?'k'+p.k:'e';d.appendChild(i)}
+ return d}
+function renderBoard(pop){const bd=$('bd');bd.innerHTML='';
+ for(let i=0;i<N*N;i++){const d=document.createElement('div');d.className='c'+(grid[i]?' k'+grid[i]:'')+(pop&&pop.has(i)?' hit':'');bd.appendChild(d)}}
+function renderTray(){const t=$('tray');t.innerHTML='';
+ pcs.forEach((p,idx)=>{const s=document.createElement('div');s.className='slot';
+  if(!p.used){const[h,w]=dims(SH[p.i]);const cs=Math.min(22,Math.floor(100/Math.max(h,w)));s.appendChild(pieceEl(p,cs));
+   s.addEventListener('pointerdown',e=>start(e,idx,s))}
+  t.appendChild(s)})}
+function cellSize(){return $('bd').getBoundingClientRect().width/N}
+function start(e,idx,slot){if(over||drag)return;e.preventDefault();
+ const p=pcs[idx],cs=cellSize(),[h,w]=dims(SH[p.i]);
+ const fl=$('fl');fl.innerHTML='';fl.appendChild(pieceEl(p,cs-2));fl.style.display='block';
+ drag={idx,h,w,cs,r:-9,c:-9,ok:false};
+ slot.setPointerCapture(e.pointerId);
+ slot.onpointermove=ev=>move(ev);slot.onpointerup=ev=>end(ev,slot);slot.onpointercancel=ev=>end(ev,slot,true);
+ move(e)}
+function move(e){if(!drag)return;const bb=$('bd').getBoundingClientRect(),d=drag;
+ const lift=e.pointerType==='mouse'?20:70;
+ const x=e.clientX-(d.w*d.cs)/2,y=e.clientY-lift-(d.h*d.cs)/2;
+ const fl=$('fl');fl.style.left=x+'px';fl.style.top=y+'px';
+ d.c=Math.round((x-bb.left-2)/d.cs);d.r=Math.round((y-bb.top-2)/d.cs);
+ d.ok=fits(SH[pcs[d.idx].i],d.r,d.c);preview()}
+function preview(){const cells=$('bd').children;for(const c of cells)c.classList.remove('pv');
+ if(!drag||!drag.ok)return;SH[pcs[drag.idx].i].forEach(([a,b])=>cells[(drag.r+a)*N+drag.c+b].classList.add('pv'))}
+function end(e,slot,cancel){if(!drag)return;const d=drag;drag=null;$('fl').style.display='none';
+ slot.onpointermove=slot.onpointerup=slot.onpointercancel=null;
+ try{slot.releasePointerCapture(e.pointerId)}catch(x){}
+ preview();if(d.ok&&!cancel)place(d);else renderBoard()}
+function place(d){const p=pcs[d.idx],s=SH[p.i];
+ s.forEach(([a,b])=>grid[(d.r+a)*N+d.c+b]=p.k);p.used=true;score+=s.length;
+ const clr=new Set();let n=0;
+ for(let r=0;r<N;r++)if([...Array(N).keys()].every(c=>grid[r*N+c])){n++;for(let c=0;c<N;c++)clr.add(r*N+c)}
+ for(let c=0;c<N;c++)if([...Array(N).keys()].every(r=>grid[r*N+c])){n++;for(let r=0;r<N;r++)clr.add(r*N+c)}
+ if(n){combo++;const gain=n*n*10+(combo>1?combo*5:0);score+=gain;clr.forEach(i=>grid[i]=0);
+  $('msg').textContent=(n>1?n+' линии! ':'Линия! ')+'+'+gain+(combo>1?' · Комбо ×'+combo:'')}
+ else{combo=0;$('msg').textContent=''}
+ if(pcs.every(x=>x.used))newPcs();
+ renderBoard(clr);renderTray();upd();
+ if(!pcs.filter(x=>!x.used).some(x=>canAny(SH[x.i]))){over=true;
+  $('fs').textContent=score;$('veil').style.display='flex'}}
+function upd(){$('sc').textContent=score;if(score>best){best=score;try{localStorage.setItem('bb_best',best)}catch(e){}}$('best').textContent=best}
+function init(){grid=new Array(N*N).fill(0);score=0;combo=0;over=false;drag=null;$('veil').style.display='none';$('msg').textContent='';newPcs();renderBoard();renderTray();upd()}
+$('again').onclick=init;init();
+</script>
+</body>
+</html>

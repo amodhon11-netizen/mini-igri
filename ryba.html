@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Тропическая рыбалка</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#cfd8d3;--ink:#1f2a2e;--soft:#5b6a6e;--card:#fff;--accent:#2b5d8a;--note:#ffe45e;--line:#9fb0a9;--ok:#1f8a5b;--red:#d93a2b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a2224;--ink:#e8efec;--soft:#97a8a8;--card:#2e3b3f;--accent:#6fb0e8;--line:#44575b;--ok:#4cc790;--red:#ff6252}}
+:root[data-theme="dark"]{--bg:#1a2224;--ink:#e8efec;--soft:#97a8a8;--card:#2e3b3f;--accent:#6fb0e8;--line:#44575b;--ok:#4cc790;--red:#ff6252}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Archivo',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;display:flex;justify-content:center}
+#app{width:100%;max-width:560px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.top{display:flex;align-items:center;gap:12px}
+.top h1{font-size:20px;margin:0;font-weight:800}
+.top a{color:var(--accent);font-weight:700;text-decoration:none}
+.hud{display:flex;gap:14px;flex-wrap:wrap;font-weight:800;font-variant-numeric:tabular-nums}
+.sea{position:relative;height:210px;border:2px solid var(--ink);box-shadow:6px 6px 0 var(--ink);background:linear-gradient(#7fd3f0 0,#2a9fd0 35%,#0d5c8f 100%);overflow:hidden;display:flex;align-items:center;justify-content:center;color:#fff}
+.sea::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(100deg,rgba(255,255,255,.08) 0 14px,transparent 14px 40px)}
+#fe{position:relative;font-size:84px;line-height:1;transition:transform .25s;text-shadow:0 4px 8px rgba(0,0,0,.3)}
+#fe.pop{animation:pop .5s}
+@keyframes pop{0%{transform:scale(.3) rotate(-20deg)}60%{transform:scale(1.25) rotate(8deg)}100%{transform:scale(1) rotate(0)}}
+#info{position:absolute;left:0;right:0;bottom:6px;text-align:center;font-weight:800;font-size:15px;text-shadow:0 1px 3px rgba(0,0,0,.6);padding:0 8px}
+.bar{position:relative;height:34px;border:2px solid var(--ink);background:var(--card);overflow:hidden}
+.zone{position:absolute;top:0;bottom:0;background:#34c76b;opacity:.9}
+.mk{position:absolute;top:-2px;bottom:-2px;width:6px;margin-left:-3px;background:var(--red)}
+.bar.flashg{outline:4px solid #34c76b;outline-offset:-4px}.bar.flashb{outline:4px solid var(--red);outline-offset:-4px}
+.dots{display:flex;justify-content:space-between;font-weight:800;font-size:15px}
+#msg{min-height:22px;font-weight:700;color:var(--accent)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+button{font:inherit;font-weight:700;padding:11px 16px;border:2px solid var(--ink);border-radius:3px;background:var(--card);color:var(--ink);cursor:pointer}
+button:disabled{opacity:.4;cursor:not-allowed}
+.big{flex:1;font-size:18px;background:var(--note);color:#1f2a2e}
+#hook{background:var(--ok);color:#fff}
+.panel{background:var(--card);border:2px solid var(--ink);padding:10px 12px}
+.panel h3{margin:0 0 8px;font-size:15px}
+.bk{display:flex;flex-direction:column;gap:4px;font-size:14px;max-height:150px;overflow:auto}
+.bk div{display:flex;justify-content:space-between}
+.shop{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.shop button{text-align:left;font-weight:400;font-size:13px}
+.shop b{display:block;font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px}
+.fc{border:2px solid var(--line);padding:6px 2px;text-align:center;font-size:11px;line-height:1.2;min-height:78px}
+.fc .e{font-size:30px;display:block;line-height:1.1}
+.fc.no .e{filter:brightness(0) opacity(.35)}
+.fc small{display:block;color:var(--soft)}
+.note{color:var(--soft);font-size:12px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top"><a href="./">← Все игры</a><h1>Тропическая рыбалка</h1></div>
+  <div class="hud"><span>Деньги: <span id="money">0</span> ₽</span><span>В ведре: <span id="bn">0</span></span><span>Удочка: ур. <span id="rl">0</span></span></div>
+  <div class="sea"><div id="fe">🎣</div><div id="info"></div></div>
+  <div class="bar" id="bar"><div class="zone" id="zone"></div><div class="mk" id="mk"></div></div>
+  <div class="dots"><span id="hits">Попадания: ○ ○ ○</span><span id="miss">Промахи: 3</span></div>
+  <div id="msg">Забрось удочку!</div>
+  <div class="row"><button class="big" id="cast">Забросить удочку</button><button class="big" id="hook" disabled>Подсечь!</button></div>
+  <div class="panel"><h3>Ведро</h3><div class="bk" id="bk"></div><div class="row" style="margin-top:8px"><button id="sell">Продать всё</button></div></div>
+  <div class="panel"><h3>Магазин</h3><div class="shop" id="shop"></div></div>
+  <div class="panel"><h3>Коллекция: <span id="cc">0</span> из <span id="ct">0</span></h3><div class="grid" id="col"></div></div>
+  <div class="note">Нужно три раза попасть красным маркером в зелёную зону (кнопка или пробел). Три промаха, и рыба сорвётся. Редкая рыба быстрее и хитрее. Прогресс сохраняется в браузере. Рыбки вымышленные, цены игровые.</div>
+  <div class="row"><button id="rst">Сбросить прогресс</button></div>
+</div>
+<script>
+/*E*/
+const RAR=[['Обычная','#7d8d8d'],['Необычная','#3f9a68'],['Редкая','#2b7fd0'],['Эпическая','#8a4cd6'],['Легендарная','#d9701a']];
+const FISH=[
+ ['Рыба-клоун','🐠',0,0,50],['Хромис','🐟',150,0,40],['Рыба-бабочка','🐠',45,0,60],['Сержант-майор','🐠',100,0,55],['Креветка','🦐',0,0,45],['Краб-отшельник','🦀',0,0,65],
+ ['Синий хирург','🐠',200,1,150],['Рыба-попугай','🐠',280,1,170],['Рыба-кузовок','🐡',40,1,160],['Рыба-ангел','🐠',320,1,180],['Кальмар','🦑',0,1,190],['Омар','🦞',0,1,210],
+ ['Мандаринка','🐠',250,2,420],['Рыба-ёж','🐡',0,2,450],['Крылатка','🐠',340,2,480],['Мурена','🐟',80,2,500],['Осьминог','🐙',0,2,520],['Рыба-луна','🐠',60,2,560],
+ ['Барракуда','🐟',210,3,1200],['Скат-манта','🐟',260,3,1500],['Рыба-меч','🐟',240,3,1600],['Тигровая акула','🦈',30,3,1900],['Морская черепаха','🐢',0,3,1700],['Каменная рыба','🐡',90,3,1400],
+ ['Арована','🐠',50,4,6000],['Золотой ангел','🐠',20,4,8000],['Белая акула','🦈',190,4,10000],['Рыба-фонарь','🐟',270,4,12000],['Кракен','🦑',270,4,25000]
+].map((f,i)=>({id:i,n:f[0],e:f[1],h:f[2],r:f[3],p:f[4]}));
+const ROD=[300,800,2000,5000,12000],BAIT=[500,2000,8000];
+function draw(bait){const w=[60,25,10,4,1].map((x,r)=>r>=2?x*(1+.8*bait):x);
+ let t=w.reduce((a,b)=>a+b),r=Math.random()*t,i=0;while(r>=w[i]){r-=w[i];i++}
+ const l=FISH.filter(f=>f.r===i);return l[Math.floor(Math.random()*l.length)]}
+function weigh(f){const k=.8+Math.random()*.7;return{k,kg:Math.round(k*(.3+f.r*.9)*10)/10,price:Math.round(f.p*k)}}
+function zoneW(r,rod){return Math.max(.1,.3-r*.04+rod*.04)}
+/*/E*/
+const $=id=>document.getElementById(id);
+const KEY='ryba_v1';
+let S={money:0,bucket:[],col:{},rod:0,bait:0};
+try{const s=localStorage.getItem(KEY);if(s)S=Object.assign(S,JSON.parse(s))}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const fmt=n=>n.toLocaleString('ru-RU');
+let st='idle',fish,hits,miss,x,dir,zs,zw,v,raf,lt,tid;
+function msg(t){$('msg').textContent=t}
+function setFish(e,h,sz){const f=$('fe');f.textContent=e;f.style.filter=h?'hue-rotate('+h+'deg)':'';f.style.fontSize=(sz||84)+'px'}
+function dots(){$('hits').textContent='Попадания: '+'● '.repeat(hits)+'○ '.repeat(3-hits);$('miss').textContent='Промахи: '+(3-miss)}
+function newZone(){zw=zoneW(fish.r,S.rod);zs=Math.random()*(1-zw);v=.9+fish.r*.28+hits*.12;
+ $('zone').style.left=zs*100+'%';$('zone').style.width=zw*100+'%'}
+function loop(t){if(st!=='fight')return;const dt=Math.min(.05,(t-lt)/1000);lt=t;
+ x+=dir*v*dt;if(x>=1){x=1;dir=-1}if(x<=0){x=0;dir=1}
+ $('mk').style.left=x*100+'%';raf=requestAnimationFrame(loop)}
+function cast(){if(st!=='idle')return;st='wait';$('cast').disabled=true;setFish('🎣',0,84);$('info').textContent='';
+ msg('Закинул удочку... ждём поклёвку');tid=setTimeout(bite,1200+Math.random()*2400)}
+function bite(){fish=draw(S.bait);st='fight';hits=0;miss=0;x=0;dir=1;dots();newZone();
+ setFish('🌊',0,84);$('hook').disabled=false;msg('Клюёт! Жми «Подсечь!», когда маркер в зелёной зоне');
+ lt=performance.now();raf=requestAnimationFrame(loop)}
+function flash(c){const b=$('bar');b.classList.remove('flashg','flashb');void b.offsetWidth;b.classList.add(c)}
+function hook(){if(st!=='fight')return;
+ if(x>=zs&&x<=zs+zw){hits++;flash('flashg')}else{miss++;flash('flashb')}
+ dots();
+ if(hits>=3)return caught();
+ if(miss>=3)return escaped();
+ newZone()}
+function end(){st='idle';cancelAnimationFrame(raf);$('hook').disabled=true;$('cast').disabled=false;render();save()}
+function caught(){const w=weigh(fish);S.bucket.push({id:fish.id,kg:w.kg,price:w.price});S.col[fish.id]=(S.col[fish.id]||0)+1;
+ const f=$('fe');setFish(fish.e,fish.h,70+fish.r*14);f.classList.remove('pop');void f.offsetWidth;f.classList.add('pop');
+ $('info').textContent=fish.n+' · '+RAR[fish.r][0]+' · '+w.kg+' кг · '+fmt(w.price)+' ₽';
+ msg('Поймал! '+(fish.r>=3?'Вот это улов! ':'')+'Рыба отправилась в ведро.');end()}
+function escaped(){setFish('💨',0,84);$('info').textContent='';msg('Рыба сорвалась. Попробуй ещё раз!');end()}
+function render(){
+ $('money').textContent=fmt(S.money);$('rl').textContent=S.rod;$('bn').textContent=S.bucket.length;
+ const agg={};S.bucket.forEach(b=>{const a=agg[b.id]||(agg[b.id]={n:0,s:0});a.n++;a.s+=b.price});
+ const ids=Object.keys(agg).sort((a,b)=>agg[b].s-agg[a].s);
+ $('bk').innerHTML=ids.length?ids.map(i=>'<div><span>'+FISH[i].e+' '+FISH[i].n+' ×'+agg[i].n+'</span><b>'+fmt(agg[i].s)+' ₽</b></div>').join(''):'<span style="color:var(--soft)">Пусто, лови рыбу!</span>';
+ const tot=S.bucket.reduce((a,b)=>a+b.price,0);$('sell').textContent='Продать всё ('+fmt(tot)+' ₽)';$('sell').disabled=!tot;
+ const sh=$('shop');sh.innerHTML='';
+ [['Удочка','Больше зелёная зона ('+S.rod+'/5)',ROD[S.rod],S.rod>=5,()=>S.rod++],['Наживка','Чаще редкая рыба ('+S.bait+'/3)',BAIT[S.bait],S.bait>=3,()=>S.bait++]]
+ .forEach(([n,d,c,max,fn])=>{const b=document.createElement('button');b.innerHTML='<b></b>'+d+'<br>'+(max?'Максимум':'Цена: '+fmt(c)+' ₽');b.querySelector('b').textContent=n;
+  b.disabled=max||S.money<c;b.onclick=()=>{S.money-=c;fn();render();save()};sh.appendChild(b)});
+ const g=$('col');g.innerHTML='';let n=0;
+ FISH.forEach(f=>{const got=S.col[f.id]||0;if(got)n++;const d=document.createElement('div');d.className='fc'+(got?'':' no');
+  d.innerHTML='<span class="e"></span>'+(got?'<span></span><small></small>':'<span>???</span><small></small>');
+  const e=d.querySelector('.e');e.textContent=f.e;if(got&&f.h)e.style.filter='hue-rotate('+f.h+'deg)';
+  if(got){d.children[1].textContent=f.n}d.querySelector('small').textContent=RAR[f.r][0]+(got?' ×'+got:'');d.querySelector('small').style.color=RAR[f.r][1];g.appendChild(d)});
+ $('cc').textContent=n;$('ct').textContent=FISH.length}
+$('cast').onclick=cast;$('hook').onclick=hook;
+$('sell').onclick=()=>{const t=S.bucket.reduce((a,b)=>a+b.price,0);S.money+=t;S.bucket=[];msg('Продано на '+fmt(t)+' ₽!');render();save()};
+$('rst').onclick=()=>{if(confirm('Сбросить все деньги, улучшения и коллекцию?')){clearTimeout(tid);S={money:0,bucket:[],col:{},rod:0,bait:0};st='idle';cancelAnimationFrame(raf);$('hook').disabled=true;$('cast').disabled=false;setFish('🎣',0,84);$('info').textContent='';msg('Забрось удочку!');render();save()}};
+document.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='Enter'){if(e.target.tagName==='BUTTON')return;e.preventDefault();if(st==='fight')hook();else if(st==='idle')cast()}});
+document.getElementById('bar').addEventListener('pointerdown',()=>{if(st==='fight')hook()});
+dots();render();
+</script>
+</body>
+</html>
