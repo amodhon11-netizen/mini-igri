@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Достижения</title>
+<script src="ach.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#cfd8d3;--ink:#1f2a2e;--soft:#5b6a6e;--card:#fff;--accent:#2b5d8a;--note:#ffe45e;--line:#9fb0a9;--ok:#1f8a5b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a2224;--ink:#e8efec;--soft:#97a8a8;--card:#2e3b3f;--accent:#6fb0e8;--line:#44575b;--ok:#4cc790}}
+:root[data-theme="dark"]{--bg:#1a2224;--ink:#e8efec;--soft:#97a8a8;--card:#2e3b3f;--accent:#6fb0e8;--line:#44575b;--ok:#4cc790}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Archivo',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;display:flex;justify-content:center}
+#app{width:100%;max-width:640px;padding:12px;display:flex;flex-direction:column;gap:14px}
+.top{display:flex;align-items:center;gap:12px}
+.top h1{font-size:22px;margin:0;font-weight:800}
+.top a{color:var(--accent);font-weight:700;text-decoration:none}
+.bar{height:16px;border:2px solid var(--ink);background:var(--card)}
+.bar i{display:block;height:100%;background:var(--ok)}
+.sum{font-weight:800;font-size:18px}
+section h2{font-size:17px;margin:0 0 8px;display:flex;justify-content:space-between}
+section h2 small{color:var(--soft);font-size:14px}
+.row{display:flex;gap:10px;align-items:center;background:var(--card);border:2px solid var(--ink);padding:8px 10px;margin-bottom:6px}
+.row.lock{border-color:var(--line);opacity:.75}
+.row .ic{font-size:24px;width:30px;text-align:center}
+.row .tx{flex:1;min-width:0}
+.row b{display:block}
+.row small{color:var(--soft);display:block;font-size:13px}
+.pb{height:6px;background:var(--line);margin-top:4px}
+.pb i{display:block;height:100%;background:var(--accent)}
+button{font:inherit;font-weight:700;padding:8px 14px;border:2px solid var(--ink);border-radius:3px;background:var(--card);color:var(--ink);cursor:pointer}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top"><a href="./">← Все игры</a><h1>Достижения</h1></div>
+  <div><div class="sum" id="sum"></div><div class="bar"><i id="pb"></i></div></div>
+  <div id="list"></div>
+  <div><button id="rst">Сбросить достижения</button></div>
+</div>
+<script>
+const fmt=n=>n.toLocaleString('ru-RU');
+function render(){
+ const t=Ach.total(),c=Ach.count();
+ document.getElementById('sum').textContent='Открыто '+c+' из '+t;
+ document.getElementById('pb').style.width=(100*c/t)+'%';
+ const L=document.getElementById('list');L.innerHTML='';
+ Object.keys(Ach.GAMES).forEach(k=>{
+  const items=Ach.LIST.filter(a=>a.game===k),got=items.filter(a=>Ach.has(a.id)).length;
+  const s=document.createElement('section');
+  s.innerHTML='<h2><span></span><small>'+got+' / '+items.length+'</small></h2>';
+  s.querySelector('span').textContent=Ach.GAMES[k];
+  items.forEach(a=>{
+   const has=Ach.has(a.id),v=Math.min(Ach.val(a.c),a.goal);
+   const r=document.createElement('div');r.className='row'+(has?'':' lock');
+   r.innerHTML='<div class="ic">'+(has?'🏆':'🔒')+'</div><div class="tx"><b></b><small></small></div>';
+   r.querySelector('b').textContent=a.name;
+   r.querySelector('small').textContent=a.desc+(!has&&a.goal>1?' ('+fmt(v)+' из '+fmt(a.goal)+')':'');
+   if(!has&&a.goal>1){const p=document.createElement('div');p.className='pb';p.innerHTML='<i style="width:'+(100*v/a.goal)+'%"></i>';r.querySelector('.tx').appendChild(p)}
+   s.appendChild(r)});
+  L.appendChild(s)})}
+document.getElementById('rst').onclick=()=>{if(confirm('Сбросить все достижения и прогресс?')){Ach.reset();render()}};
+render();
+</script>
+</body>
+</html>

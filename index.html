@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Мини-игры</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#cfd8d3;--ink:#1f2a2e;--soft:#5b6a6e;--card:#fff;--note:#ffe45e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a2224;--ink:#e8efec;--soft:#97a8a8;--card:#2e3b3f}}
+:root[data-theme="dark"]{--bg:#1a2224;--ink:#e8efec;--soft:#97a8a8;--card:#2e3b3f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Archivo',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;display:flex;justify-content:center}
+main{width:100%;max-width:760px;padding:28px 16px}
+h1{font-size:clamp(34px,8vw,56px);margin:0 0 6px;font-weight:800;line-height:1}
+.sub{color:var(--soft);margin:0 0 10px}
+.by{display:inline-block;margin-bottom:22px;background:var(--note);color:#1f2a2e;border:2px solid var(--ink);padding:3px 12px;font-size:15px}
+footer{margin-top:28px;color:var(--soft);font-size:13px;text-align:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+a.card{display:block;text-decoration:none;color:var(--ink);background:var(--card);border:2px solid var(--ink);box-shadow:6px 6px 0 var(--ink);padding:18px;transition:transform .1s}
+a.card:hover{transform:translate(-2px,-2px)}
+a.card:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.ic{display:inline-block;background:var(--note);color:#1f2a2e;border:2px solid var(--ink);padding:2px 10px;font-weight:800;margin-bottom:10px}
+h2{margin:0 0 6px;font-size:22px}
+p{margin:0;color:var(--soft);line-height:1.4}
+.soon{opacity:.55;border-style:dashed;box-shadow:none}
+</style>
+</head>
+<body>
+<main>
+  <h1>Мини-игры</h1>
+  <p class="sub">Восемь игр и 64 достижения. Выбирай и играй.</p>
+  <div class="by">Автор: <b>Kalgy</b></div>
+  <div class="grid">
+    <a class="card" href="office.html"><span class="ic">60 сек</span><h2>Офисный день</h2><p>Успей сделать работу, пока все мешают.</p></a>
+    <a class="card" href="chess.html"><span class="ic">Шахматы</span><h2>Шахматы против бота</h2><p>Три уровня сложности, играй за белых или за чёрных.</p></a>
+    <a class="card" href="sapper.html"><span class="ic">Мины</span><h2>Сапёр</h2><p>Классика с тремя уровнями сложности. Первый клик безопасный.</p></a>
+    <a class="card" href="casino.html"><span class="ic">Риск</span><h2>Казино «Рискни»</h2><p>Автомат, талисманы и риск «удвой или потеряй». Цель: 1000 монет.</p></a>
+    <a class="card" href="nomera.html"><span class="ic">Номера</span><h2>Крутилка номеров</h2><p>Крути российские номера, смотри цену и собирай топ лучших.</p></a>
+    <a class="card" href="blocks.html"><span class="ic">Пазл</span><h2>Block Blast</h2><p>Перетаскивай фигуры, собирай линии и бей рекорды.</p></a>
+    <a class="card" href="kassa.html"><span class="ic">Хоррор</span><h2>Ночная касса</h2><p>Ты кассир. Считай сдачу и гони монстров, которые прикидываются людьми.</p></a>
+    <a class="card" href="ryba.html"><span class="ic">Улов</span><h2>Тропическая рыбалка</h2><p>Лови редких рыбок, продавай и прокачивай удочку.</p></a>
+    <a class="card" href="achievements.html"><span class="ic">🏆</span><h2>Достижения</h2><p id="ac">Открыто: 0</p></a>
+  </div>
+  <footer>Сделано автором Kalgy</footer>
+</main>
+<script src="ach.js"></script>
+<script>if(window.Ach)document.getElementById("ac").textContent="Открыто: "+Ach.count()+" из "+Ach.total()+". Выполняй задания в играх и получай значки."</script>
+</body>
+</html>
